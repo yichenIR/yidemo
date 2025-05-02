@@ -162,23 +162,46 @@ input::placeholder {
     border-radius: 4px;
 }
 
-/* 消息樣式 */
+/* 訊息樣式優化 */
 .message {
-    margin-bottom: 8px;
-    padding: 8px 12px;
-    border-radius: 4px;
+    margin-bottom: 12px;
+    padding: 10px;
+    border-radius: 8px;
     background: #404040;
+}
+
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.message-header strong {
+    color: #ff9900;
+}
+
+.message-time {
+    font-size: 12px;
+    color: #808080;
+}
+
+.message-content {
+    color: #e0e0e0;
     word-break: break-word;
+    line-height: 1.4;
 }
 
 .system-message {
     background: #4a4a40;
+}
+
+.system-message .message-header strong {
     color: #ffd700;
 }
 
-.player-message {
-    background: #404040;
-    color: #e0e0e0;
+.system-message .message-content {
+    color: #ffd700;
 }
 
 /* 房間列表項目 */
@@ -192,7 +215,7 @@ input::placeholder {
     align-items: center;
 }
 
-.room-item span {
+room-item span {
     color: #e0e0e0;
 }
 

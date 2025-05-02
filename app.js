@@ -25,6 +25,7 @@ class WerewolfGame {
         this.currentRoom = null;
         this.gun = gun;
         this.localMessages = [];  // 新增本地訊息陣列
+        this.messageSet = new Set(); // 用來追蹤已顯示的訊息
         this.setupListeners();
     }
 
@@ -128,6 +129,8 @@ class WerewolfGame {
         }
 
         this.currentRoom = roomId;
+        this.localMessages = [];
+        this.messageSet.clear();
         
         // 顯示房間代碼
         document.getElementById('currentRoomCode').textContent = roomId;
@@ -161,17 +164,22 @@ class WerewolfGame {
             }
         });
 
-        // 重置本地訊息
-        this.localMessages = [];
-
-        // 監聽消息
-        this.gun.get('rooms').get(roomId).get('messages').on((messages) => {
-            if (!messages) return;
-            // 更新本地訊息並顯示
-            if (!this.localMessages.some(m => m.timestamp === messages.timestamp)) {
-                this.localMessages.push(messages);
+        // 獲取房間的所有歷史訊息
+        this.gun.get('rooms').get(roomId).get('messages').map().once((msg, key) => {
+            if (msg && !this.messageSet.has(msg.timestamp)) {
+                this.messageSet.add(msg.timestamp);
+                this.localMessages.push(msg);
+                this.displayMessages();
             }
-            this.displayMessages();
+        });
+
+        // 監聽新訊息
+        this.gun.get('rooms').get(roomId).get('messages').map().on((msg, key) => {
+            if (msg && !this.messageSet.has(msg.timestamp)) {
+                this.messageSet.add(msg.timestamp);
+                this.localMessages.push(msg);
+                this.displayMessages();
+            }
         });
 
         this.showSection('gameSection');
@@ -186,16 +194,14 @@ class WerewolfGame {
         const newMessage = {
             sender: this.currentPlayer.name,
             content: message,
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
         };
 
-        // 立即在本地顯示訊息
-        this.localMessages.push(newMessage);
-        this.displayMessages();
-
-        // 同時發送到 GUN 進行同步
+        // 發送到 GUN
         this.gun.get('rooms').get(this.currentRoom).get('messages')
-            .set(newMessage);
+            .get(newMessage.id)
+            .put(newMessage);
 
         input.value = '';
     }
@@ -206,16 +212,14 @@ class WerewolfGame {
             sender: 'System',
             content: content,
             timestamp: Date.now(),
-            system: true
+            system: true,
+            id: `sys_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
         };
 
-        // 立即在本地顯示系統訊息
-        this.localMessages.push(message);
-        this.displayMessages();
-
-        // 同時發送到 GUN 進行同步
+        // 發送到 GUN
         this.gun.get('rooms').get(this.currentRoom).get('messages')
-            .set(message);
+            .get(message.id)
+            .put(message);
     }
 
     // 開始遊戲
@@ -343,15 +347,27 @@ class WerewolfGame {
         const container = document.getElementById('chatMessages');
         if (!this.localMessages.length) return;
 
-        container.innerHTML = this.localMessages
-            .sort((a, b) => a.timestamp - b.timestamp)
-            .map(msg => `
-                <div class="message ${msg.system ? 'system-message' : 'player-message'}">
-                    <strong>${msg.sender}:</strong> ${msg.content}
+        const sortedMessages = [...this.localMessages].sort((a, b) => a.timestamp - b.timestamp);
+
+        container.innerHTML = sortedMessages.map(msg => `
+            <div class="message ${msg.system ? 'system-message' : 'player-message'}">
+                <div class="message-header">
+                    <strong>${msg.sender}</strong>
+                    <span class="message-time">${this.formatTime(msg.timestamp)}</span>
                 </div>
-            `).join('');
+                <div class="message-content">${msg.content}</div>
+            </div>
+        `).join('');
         
         container.scrollTop = container.scrollHeight;
+    }
+
+    // 格式化時間
+    formatTime(timestamp) {
+        const date = new Date(timestamp);
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        return `${hours}:${minutes}`;
     }
 
     // 顯示指定區段

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>狼人殺遊戲</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- GUN.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gun/sea.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- 登入區塊 -->
+        <div id="loginSection" class="section">
+            <h1>狼人殺遊戲</h1>
+            <div class="login-form">
+                <input type="text" id="playerName" placeholder="請輸入你的名字">
+                <button id="loginBtn">進入遊戲</button>
+            </div>
+        </div>
+
+        <!-- 大廳區塊 -->
+        <div id="lobbySection" class="section hidden">
+            <h2>遊戲大廳</h2>
+            <div class="room-controls">
+                <button id="createRoomBtn">創建房間</button>
+                <input type="text" id="roomCode" placeholder="輸入房間代碼">
+                <button id="joinRoomBtn">加入房間</button>
+            </div>
+            <div id="roomList"></div>
+        </div>
+
+        <!-- 創建房間對話框 -->
+        <div id="createRoomDialog" class="dialog hidden">
+            <div class="dialog-content">
+                <h3>創建新房間</h3>
+                <p>您的房間代碼：<span id="generatedRoomCode" class="room-code"></span></p>
+                <div class="form-group">
+                    <input type="text" id="roomNameInput" placeholder="請為房間命名">
+                    <button id="confirmCreateRoom">確認創建</button>
+                    <button id="cancelCreateRoom">取消</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 遊戲房間區塊 -->
+        <div id="gameSection" class="section hidden">
+            <div class="game-header">
+                <h2>房間: <span id="roomName"></span></h2>
+                <div class="room-info">
+                    <span>房間代碼：</span>
+                    <span id="currentRoomCode" class="room-code-display"></span>
+                    <button id="copyRoomCode" title="複製房間代碼">📋</button>
+                </div>
+                <div id="gameStatus"></div>
+                <div id="startGameSection">
+                    <button id="startGameBtn" class="hidden">開始遊戲</button>
+                </div>
+            </div>
+            <div class="game-container">
+                <div class="players-list" id="playersList"></div>
+                <div class="game-info">
+                    <div id="roleInfo"></div>
+                    <div id="phaseInfo"></div>
+                </div>
+                <div class="chat-area">
+                    <div id="chatMessages"></div>
+                    <div class="chat-input">
+                        <input type="text" id="chatInput" placeholder="輸入訊息...">
+                        <button id="sendMessage">發送</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
